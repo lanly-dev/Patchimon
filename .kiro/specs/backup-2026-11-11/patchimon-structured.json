@@ -1,0 +1,537 @@
+{
+  "id": "patchimon-v1",
+  "name": "Patchimon v1 - Grey-Box Avatar",
+  "description": "3D Monster Pair Programming Companion for Kiro IDE. Stitches three incompatible technologies: 3D generation pipeline + VS Code Extension Host APIs + Webview 3D Scene (Three.js)",
+  "version": "1.0.0",
+  "created": "2026-11-11",
+  "status": "in_progress",
+  "requirements": [
+    {
+      "id": "FR1",
+      "category": "functional",
+      "title": "Extension Infrastructure",
+      "description": "TypeScript VS Code extension targeting Kiro IDE with webview panel integration",
+      "acceptance_criteria": [
+        "Extension activates on command: 'Patchimon: Show Avatar'",
+        "Webview panel displays in sidebar",
+        "Zero external setup required (no API keys, GPU, accounts)",
+        "Works completely offline"
+      ],
+      "priority": "critical",
+      "status": "completed"
+    },
+    {
+      "id": "FR2",
+      "category": "functional",
+      "title": "Avatar System",
+      "description": "Single preset monster avatar with segmented body parts and patch colors",
+      "acceptance_criteria": [
+        "Classic Patch-Plush design with 7 segmented parts",
+        "Color scheme: mint, lavender, mustard, dusty pink patches",
+        "Three.js renderer displays avatar in webview",
+        "Design principle: 'the seams are the joints'"
+      ],
+      "priority": "critical",
+      "status": "completed"
+    },
+    {
+      "id": "FR3",
+      "category": "functional",
+      "title": "Animation System",
+      "description": "Three procedural animation states with parts-and-pivots approach",
+      "acceptance_criteria": [
+        "Idle animation: breathing sway + bolt twitch",
+        "Celebrate animation: arms up + hop motion",
+        "Flinch animation: squash down + arms cover face",
+        "No skeletal animation required",
+        "Smooth transitions via requestAnimationFrame"
+      ],
+      "priority": "critical",
+      "status": "completed"
+    },
+    {
+      "id": "FR4",
+      "category": "functional",
+      "title": "Editor Reaction System",
+      "description": "Monitor VS Code diagnostics and file events to trigger avatar reactions",
+      "acceptance_criteria": [
+        "Flinch triggers when error diagnostics appear",
+        "Celebrate triggers when errors clear after existing",
+        "File save shows acknowledgment in idle state",
+        "No chat or LLM features"
+      ],
+      "priority": "critical",
+      "status": "completed"
+    },
+    {
+      "id": "NFR1",
+      "category": "non-functional",
+      "title": "Kiroween 2026 Compliance",
+      "description": "Meet all hackathon hard rules and requirements",
+      "acceptance_criteria": [
+        "Spec-first development: spec committed before code",
+        "/.kiro directory at repo root, never gitignored",
+        "MIT license file at repo root",
+        "No absolute local paths in any files",
+        "All references use repo-relative paths only",
+        "No third-party monster-franchise trademarks"
+      ],
+      "priority": "critical",
+      "status": "completed"
+    },
+    {
+      "id": "NFR2",
+      "category": "non-functional",
+      "title": "Technical Constraints",
+      "description": "Architecture and technical requirements for extension",
+      "acceptance_criteria": [
+        "Three.js WebGL renderer with proper CSP",
+        "CSP allows blob: and data: for img-src/connect-src",
+        "Extension packages as VSIX for judge installation",
+        "Works on fresh Kiro install with no setup",
+        "Credit budget ~900 Kiro credits"
+      ],
+      "priority": "high",
+      "status": "completed"
+    },
+    {
+      "id": "NFR3",
+      "category": "non-functional",
+      "title": "Performance",
+      "description": "Responsive and efficient avatar rendering",
+      "acceptance_criteria": [
+        "Webview loads and renders avatar within 2 seconds",
+        "Animation transitions within 200ms of trigger",
+        "Minimal CPU usage during idle animation"
+      ],
+      "priority": "medium",
+      "status": "completed"
+    }
+  ],
+  "design": {
+    "architecture": "Three-tier system: Extension Host (Node.js) <-> Message Bridge <-> Webview (Browser/Three.js)",
+    "components": [
+      {
+        "name": "Extension Entry Point",
+        "file": "src/extension.ts",
+        "responsibility": "Activation, command registration, webview provider initialization, diagnostics monitor setup",
+        "frankenstein_seam": "1: VS Code Extension Host APIs"
+      },
+      {
+        "name": "Webview Provider",
+        "file": "src/patchyViewProvider.ts",
+        "responsibility": "Webview lifecycle management, HTML generation with CSP, message bridge, Three.js scene setup",
+        "frankenstein_seam": "2: Message Bridge (IPC)"
+      },
+      {
+        "name": "Diagnostics Monitor",
+        "file": "src/diagnosticsMonitor.ts",
+        "responsibility": "Editor event listening, error state tracking, animation command translation",
+        "frankenstein_seam": "1: VS Code Extension Host APIs"
+      },
+      {
+        "name": "Avatar Renderer",
+        "location": "Webview inline JavaScript",
+        "responsibility": "Three.js scene, grey-box geometry, procedural animation, message handling",
+        "frankenstein_seam": "3: Webview 3D Scene (Three.js)"
+      },
+      {
+        "name": "Animation Controller",
+        "location": "Webview inline JavaScript",
+        "responsibility": "State machine, procedural transforms, requestAnimationFrame loop",
+        "frankenstein_seam": "3: Webview 3D Scene (Three.js)"
+      }
+    ],
+    "critical_decisions": [
+      {
+        "decision": "CSP Configuration",
+        "rationale": "GLTFLoader fetches embedded textures from blob: URLs. Without img-src/connect-src allowing blob:/data:, models render grey with no error.",
+        "source": "Learned from 3D Kits viewer project (2026-10)"
+      },
+      {
+        "decision": "Grey-box before real asset",
+        "rationale": "Test reaction loop with simple geometry before investing in 3D asset generation. Order: extension shell + grey-box reactions FIRST, real assets SECOND.",
+        "source": "AGENTS.md 'How we work' section"
+      },
+      {
+        "decision": "Parts-and-pivots animation",
+        "rationale": "No skeletal animation needed for non-humanoid. Segmented parts with 'seams are joints' principle allows procedural animation.",
+        "source": "Design principle from monster specification"
+      }
+    ]
+  },
+  "tasks": [
+    {
+      "id": "T1.1",
+      "phase": "Phase 1: Scaffold",
+      "title": "Initialize TypeScript project with VS Code extension boilerplate",
+      "description": "Set up package.json with extension manifest, tsconfig.json for TypeScript compilation, and extension entry point structure",
+      "requirements": ["FR1"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 5,
+      "actual_credits": 5
+    },
+    {
+      "id": "T1.2",
+      "phase": "Phase 1: Scaffold",
+      "title": "Create MIT license file at repo root",
+      "description": "Add MIT license file as required by Kiroween compliance",
+      "requirements": ["NFR1"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 1,
+      "actual_credits": 1
+    },
+    {
+      "id": "T1.3",
+      "phase": "Phase 1: Scaffold",
+      "title": "Set up build tooling",
+      "description": "Configure TypeScript compilation and VSIX packaging",
+      "requirements": ["FR1", "NFR2"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 3,
+      "actual_credits": 3
+    },
+    {
+      "id": "T1.4",
+      "phase": "Phase 1: Scaffold",
+      "title": "Create basic extension activation and command registration",
+      "description": "Implement activate() function and register 'patchimon.showAvatar' command",
+      "requirements": ["FR1"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 3,
+      "actual_credits": 3
+    },
+    {
+      "id": "T2.1",
+      "phase": "Phase 2: Webview Infrastructure",
+      "title": "Implement webview provider with panel lifecycle management",
+      "description": "Create PatchyViewProvider implementing WebviewViewProvider interface",
+      "requirements": ["FR1", "FR2"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 5,
+      "actual_credits": 5
+    },
+    {
+      "id": "T2.2",
+      "phase": "Phase 2: Webview Infrastructure",
+      "title": "Create webview HTML template with proper CSP",
+      "description": "Generate HTML with CSP allowing blob: and data: for img-src and connect-src (critical for Three.js texture loading)",
+      "requirements": ["FR2", "NFR2"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 5,
+      "actual_credits": 5
+    },
+    {
+      "id": "T2.3",
+      "phase": "Phase 2: Webview Infrastructure",
+      "title": "Integrate Three.js via CDN in webview HTML",
+      "description": "Add Three.js from jsdelivr CDN for offline capability via browser cache",
+      "requirements": ["FR2"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 2,
+      "actual_credits": 2
+    },
+    {
+      "id": "T2.4",
+      "phase": "Phase 2: Webview Infrastructure",
+      "title": "Set up basic Three.js scene",
+      "description": "Initialize scene, camera, renderer, and lighting",
+      "requirements": ["FR2"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 5,
+      "actual_credits": 5
+    },
+    {
+      "id": "T2.5",
+      "phase": "Phase 2: Webview Infrastructure",
+      "title": "Verify webview renders (screenshot checkpoint)",
+      "description": "Confirm scene renders correctly and is not grey (CSP verification)",
+      "requirements": ["FR2", "NFR2"],
+      "priority": "critical",
+      "status": "in_progress",
+      "estimated_credits": 1,
+      "actual_credits": 0
+    },
+    {
+      "id": "T3.1",
+      "phase": "Phase 3: Grey-Box Avatar",
+      "title": "Create segmented avatar geometry using Three.js primitives",
+      "description": "Build 7 parts: head (sphere), belly (plane), 2 arms (cylinders), 2 feet (boxes), bolt (cylinder)",
+      "requirements": ["FR2"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 8,
+      "actual_credits": 8
+    },
+    {
+      "id": "T3.2",
+      "phase": "Phase 3: Grey-Box Avatar",
+      "title": "Group parts under pivot points for animation",
+      "description": "Create THREE.Group structures for arms with pivot points at shoulders",
+      "requirements": ["FR2", "FR3"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 3,
+      "actual_credits": 3
+    },
+    {
+      "id": "T3.3",
+      "phase": "Phase 3: Grey-Box Avatar",
+      "title": "Apply patch colors to different segments",
+      "description": "Set materials: mint, lavender, mustard, dusty pink to different parts",
+      "requirements": ["FR2"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 2,
+      "actual_credits": 2
+    },
+    {
+      "id": "T3.4",
+      "phase": "Phase 3: Grey-Box Avatar",
+      "title": "Verify avatar is visible and colored (not grey) in panel",
+      "description": "Screenshot verification that CSP is working correctly",
+      "requirements": ["FR2", "NFR2"],
+      "priority": "critical",
+      "status": "in_progress",
+      "estimated_credits": 1,
+      "actual_credits": 0
+    },
+    {
+      "id": "T4.1",
+      "phase": "Phase 4: Animation System",
+      "title": "Implement idle animation",
+      "description": "Sinusoidal Y-axis breathing sway + occasional bolt twitch",
+      "requirements": ["FR3"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 5,
+      "actual_credits": 5
+    },
+    {
+      "id": "T4.2",
+      "phase": "Phase 4: Animation System",
+      "title": "Implement celebrate animation",
+      "description": "Arms up rotation + body hop (Y-translation), 1 second duration",
+      "requirements": ["FR3"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 5,
+      "actual_credits": 5
+    },
+    {
+      "id": "T4.3",
+      "phase": "Phase 4: Animation System",
+      "title": "Implement flinch animation",
+      "description": "Squash down (Y-scale) + arms cover face position, 0.5 second duration",
+      "requirements": ["FR3"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 5,
+      "actual_credits": 5
+    },
+    {
+      "id": "T4.4",
+      "phase": "Phase 4: Animation System",
+      "title": "Create animation state machine in webview",
+      "description": "State transitions: idle <-> celebrate, idle <-> flinch, with duration timers",
+      "requirements": ["FR3"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 5,
+      "actual_credits": 5
+    },
+    {
+      "id": "T4.5",
+      "phase": "Phase 4: Animation System",
+      "title": "Handle animation messages from extension host",
+      "description": "Window message listener for {command: 'animate', state: 'idle'|'celebrate'|'flinch'}",
+      "requirements": ["FR3", "FR4"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 3,
+      "actual_credits": 3
+    },
+    {
+      "id": "T5.1",
+      "phase": "Phase 5: Editor Integration",
+      "title": "Implement diagnostics monitor listening to VS Code diagnostics API",
+      "description": "Subscribe to vscode.languages.onDidChangeDiagnostics event",
+      "requirements": ["FR4"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 5,
+      "actual_credits": 5
+    },
+    {
+      "id": "T5.2",
+      "phase": "Phase 5: Editor Integration",
+      "title": "Track error state transitions",
+      "description": "Maintain hasErrors boolean, detect none→errors and errors→none transitions",
+      "requirements": ["FR4"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 3,
+      "actual_credits": 3
+    },
+    {
+      "id": "T5.3",
+      "phase": "Phase 5: Editor Integration",
+      "title": "Send flinch message when errors appear",
+      "description": "Call provider.animate('flinch') on none→errors transition",
+      "requirements": ["FR4"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 2,
+      "actual_credits": 2
+    },
+    {
+      "id": "T5.4",
+      "phase": "Phase 5: Editor Integration",
+      "title": "Send celebrate message when errors clear after existing",
+      "description": "Call provider.animate('celebrate') on errors→none transition",
+      "requirements": ["FR4"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 2,
+      "actual_credits": 2
+    },
+    {
+      "id": "T5.5",
+      "phase": "Phase 5: Editor Integration",
+      "title": "Send idle acknowledgment on file save events",
+      "description": "Subscribe to onDidSaveTextDocument, call provider.acknowledgeSave()",
+      "requirements": ["FR4"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 3,
+      "actual_credits": 3
+    },
+    {
+      "id": "T6.1",
+      "phase": "Phase 6: Packaging & Verification",
+      "title": "Configure VSIX packaging",
+      "description": "Set up .vscodeignore and npm package script",
+      "requirements": ["NFR2"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 2,
+      "actual_credits": 2
+    },
+    {
+      "id": "T6.2",
+      "phase": "Phase 6: Packaging & Verification",
+      "title": "Create README with installation instructions",
+      "description": "3-step process: install VSIX → open panel → code something broken",
+      "requirements": ["NFR1", "NFR2"],
+      "priority": "high",
+      "status": "completed",
+      "estimated_credits": 5,
+      "actual_credits": 5
+    },
+    {
+      "id": "T6.3",
+      "phase": "Phase 6: Packaging & Verification",
+      "title": "Build VSIX package",
+      "description": "Run npm run package to create patchimon-x.x.x.vsix",
+      "requirements": ["NFR2"],
+      "priority": "critical",
+      "status": "completed",
+      "estimated_credits": 1,
+      "actual_credits": 1
+    },
+    {
+      "id": "T6.4",
+      "phase": "Phase 6: Packaging & Verification",
+      "title": "Run acceptance checks",
+      "description": "Fresh install, avatar visible/colored, error triggers flinch, fix triggers celebrate, works offline",
+      "requirements": ["FR1", "FR2", "FR3", "FR4", "NFR1", "NFR2"],
+      "priority": "critical",
+      "status": "in_progress",
+      "estimated_credits": 5,
+      "actual_credits": 0
+    },
+    {
+      "id": "T7.1",
+      "phase": "Phase 7: Documentation",
+      "title": "Document the three stitched technologies in README",
+      "description": "Explicitly name: 3D generation pipeline + VS Code Extension Host APIs + Webview 3D Scene",
+      "requirements": ["NFR1"],
+      "priority": "high",
+      "status": "completed",
+      "estimated_credits": 3,
+      "actual_credits": 3
+    },
+    {
+      "id": "T7.2",
+      "phase": "Phase 7: Documentation",
+      "title": "Add code comments explaining Frankenstein seams",
+      "description": "Document which seam each component belongs to in source files",
+      "requirements": ["NFR1"],
+      "priority": "high",
+      "status": "completed",
+      "estimated_credits": 2,
+      "actual_credits": 2
+    },
+    {
+      "id": "T7.3",
+      "phase": "Phase 7: Documentation",
+      "title": "Prepare Devpost description draft",
+      "description": "Features, functionality, and Kiro usage write-up",
+      "requirements": ["NFR1"],
+      "priority": "high",
+      "status": "not_started",
+      "estimated_credits": 5,
+      "actual_credits": 0
+    },
+    {
+      "id": "T7.4",
+      "phase": "Phase 7: Documentation",
+      "title": "Create changelog",
+      "description": "Document version history and changes",
+      "requirements": ["NFR1"],
+      "priority": "medium",
+      "status": "not_started",
+      "estimated_credits": 2,
+      "actual_credits": 0
+    }
+  ],
+  "metrics": {
+    "total_tasks": 29,
+    "completed_tasks": 25,
+    "in_progress_tasks": 3,
+    "not_started_tasks": 1,
+    "completion_percentage": 86,
+    "estimated_total_credits": 110,
+    "actual_credits_used": 90,
+    "budget_allocated": 900,
+    "budget_remaining": 810
+  },
+  "frankenstein_seams": {
+    "seam_1": {
+      "name": "VS Code Extension Host APIs",
+      "technology": "Node.js process with VS Code extension API",
+      "components": ["extension.ts", "diagnosticsMonitor.ts"],
+      "responsibilities": ["Lifecycle management", "Editor event monitoring", "Command registration"]
+    },
+    "seam_2": {
+      "name": "Message Bridge (IPC)",
+      "technology": "postMessage between Node.js and browser contexts",
+      "components": ["patchyViewProvider.ts message protocol"],
+      "responsibilities": ["Command serialization", "Context bridging", "Event translation"]
+    },
+    "seam_3": {
+      "name": "Webview 3D Scene",
+      "technology": "Three.js WebGL rendering in browser context",
+      "components": ["Webview inline JavaScript", "Three.js scene", "Animation controller"],
+      "responsibilities": ["3D rendering", "Procedural animation", "Visual feedback"]
+    }
+  }
+}

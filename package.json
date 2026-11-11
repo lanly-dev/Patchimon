@@ -1,0 +1,60 @@
+{
+  "name": "patchimon",
+  "displayName": "Patchimon",
+  "description": "3D monster pair programming companion that reacts to your code",
+  "version": "0.1.0",
+  "publisher": "patchimon-team",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:patchimon.showAvatar"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "patchimon.showAvatar",
+        "title": "Patchimon: Show Avatar"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "patchimon-sidebar",
+          "title": "Patchimon",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "patchimon-sidebar": [
+        {
+          "type": "webview",
+          "id": "patchimon.avatarView",
+          "name": "Avatar"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.80.0",
+    "@vscode/vsce": "^2.19.0",
+    "typescript": "^5.0.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lanly-dev/patchimon"
+  }
+}

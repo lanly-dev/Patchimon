@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Spec Sync Check",
+      "trigger": "PostFileSave",
+      "description": "Reminds agent to verify spec tasks are updated when implementation changes",
+      "matcher": "src/.*\\.(ts|js)$",
+      "action": {
+        "type": "agent",
+        "prompt": "When modifying implementation files, verify that the corresponding tasks in .kiro/specs/patchimon-v1.md are updated or marked complete. Spec-driven development requires keeping specs synchronized with implementation."
+      }
+    }
+  ]
+}

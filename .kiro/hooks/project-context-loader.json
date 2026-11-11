@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Load Project Context",
+      "trigger": "SessionStart",
+      "description": "Loads project context and coding standards at session start",
+      "action": {
+        "type": "agent",
+        "prompt": "Read AGENTS.md for project requirements and .kiro/steering/kiroween-compliance.md for hard rules. Remember: this is a Kiroween 2026 Frankenstein entry with strict compliance requirements (no absolute paths, spec-first development, three technologies stitched together). The three Frankenstein seams are: 1) 3D generation pipeline, 2) VS Code Extension Host APIs, 3) Webview 3D Scene (Three.js)."
+      }
+    }
+  ]
+}

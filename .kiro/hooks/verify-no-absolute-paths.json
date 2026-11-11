@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Verify No Absolute Paths on Save",
+      "trigger": "PostFileSave",
+      "description": "Check for absolute local paths on file save to enforce Kiroween compliance",
+      "matcher": "\\.(ts|js|md|json)$",
+      "action": {
+        "type": "command",
+        "command": "powershell -Command \"if (Select-String -Path $env:FILE_PATH -Pattern '(C:\\\\Users|/home/|~/workspace)' -Quiet) { Write-Error 'WARNING: Absolute path detected in saved file'; exit 2 }\""
+      }
+    }
+  ]
+}

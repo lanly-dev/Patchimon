@@ -1,0 +1,15 @@
+﻿{
+  "specId": "b32e5c65-555b-439a-89a4-9b682318c084",
+  "featureName": "grey-box-avatar",
+  "displayName": "Grey-Box Avatar Implementation",
+  "workflowType": "requirements-first",
+  "specType": "feature",
+  "status": "in_progress",
+  "progress": {
+    "completedTasks": 25,
+    "totalTasks": 29,
+    "percentage": 86
+  },
+  "created": "2026-11-11",
+  "updated": "2026-11-11"
+}

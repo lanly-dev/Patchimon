@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Auto-Compile TypeScript on Save",
+      "trigger": "PostFileSave",
+      "description": "Auto-compile TypeScript after saving source files to catch errors immediately",
+      "matcher": "src/.*\\.ts$",
+      "action": {
+        "type": "command",
+        "command": "npm run compile",
+        "timeout": 30
+      }
+    }
+  ]
+}

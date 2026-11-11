@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Package.json Change Reminder",
+      "trigger": "PostFileSave",
+      "description": "Reminds developer to reinstall dependencies and rebuild VSIX after package.json changes",
+      "matcher": "package\\.json$",
+      "action": {
+        "type": "command",
+        "command": "powershell -Command \"Write-Host '✓ Package JSON modified - remember to run npm install if dependencies changed'; Write-Host '✓ After changes, rebuild VSIX with: npm run package'\""
+      }
+    }
+  ]
+}
